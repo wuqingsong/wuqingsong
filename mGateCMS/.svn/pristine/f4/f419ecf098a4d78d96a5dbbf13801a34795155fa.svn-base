@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.llbt.cms.dao.SystemServiceMapper">
+	<!-- 查询结果映射 -->
+	<resultMap id="searchResultMap" type="com.llbt.cms.entity.SystemService">
+		<result property="id" column="ID" />
+		<result property="createBy" column="CREATE_BY" />
+		<result property="createDate" column="CREATE_DATE" />
+		<result property="updateBy" column="UPDATE_BY" />
+		<result property="updateDate" column="UPDATE_DATE" />
+		<result property="serviceCode" column="SERVICE_CODE" />
+		<result property="serviceName" column="SERVICE_NAME" />
+		<result property="serviceDesc" column="SERVICE_DESC" />
+		<result property="dictId" column="DICT_ID" />
+		<result property="listType" column="LIST_TYPE" />
+		<result property="serviceState" column="SERVICE_STATE" />
+		<result property="isDelete" column="IS_DELETE" />
+	</resultMap>
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+		ID,CREATE_BY,CREATE_DATE,UPDATE_BY,UPDATE_DATE,SERVICE_CODE,SERVICE_NAME,SERVICE_DESC,DICT_ID,LIST_TYPE,SERVICE_STATE,IS_DELETE
+	</sql>
+	<!-- 新增记录 -->
+	<insert id="insert" parameterType="com.llbt.cms.entity.SystemService">
+		INSERT INTO MMS_SYSTEM_SERVICE
+		(
+		ID ,
+		CREATE_BY ,
+		CREATE_DATE ,
+		UPDATE_BY ,
+		UPDATE_DATE ,
+		SERVICE_CODE ,
+		SERVICE_NAME ,
+		SERVICE_DESC ,
+		DICT_ID ,
+		LIST_TYPE ,
+		SERVICE_STATE ,
+		IS_DELETE
+		) VALUES (
+		#{id},
+		#{createBy},
+		#{createDate},
+		#{updateBy},
+		#{updateDate},
+		#{serviceCode},
+		#{serviceName},
+		#{serviceDesc},
+		#{dictId},
+		#{listType},
+		#{serviceState},
+		#{isDelete}
+		)
+	</insert>
+	<!-- 单记录删除 -->
+	<delete id="delete" parameterType="java.lang.String">
+		update MMS_SYSTEM_SERVICE set
+		is_delete=1
+		where id=#{id}
+	</delete>
+	<!-- 批量记录删除 -->
+	<delete id="deleteByIds" parameterType="java.util.List">
+		update MMS_SYSTEM_SERVICE set is_delete=1 where id in
+		<foreach collection="list" item="ids" open="(" separator=","
+			close=")">#{ids}</foreach>
+	</delete>
+	<!-- 单记录更新 -->
+	<update id="update" parameterType="com.llbt.cms.entity.SystemService">
+		UPDATE MMS_SYSTEM_SERVICE
+		<trim prefix="set" suffixOverrides=",">
+			<if test="updateBy != null">
+				UPDATE_BY =#{updateBy},
+			</if>
+			<if test="updateDate != null">
+				UPDATE_DATE =#{updateDate},
+			</if>
+			<if test="serviceCode != null">
+				SERVICE_CODE =#{serviceCode},
+			</if>
+			<if test="serviceName != null">
+				SERVICE_NAME =#{serviceName},
+			</if>
+			<if test="serviceDesc != null">
+				SERVICE_DESC =#{serviceDesc},
+			</if>
+			<if test="dictId != null">
+				DICT_ID =#{dictId},
+			</if>
+			<if test="listType != null">
+				LIST_TYPE =#{listType},
+			</if>
+			<if test="serviceState != null">
+				SERVICE_STATE =#{serviceState},
+			</if>
+			<if test="isDelete != null">
+				IS_DELETE =#{isDelete},
+			</if>
+		</trim>
+		where id=#{id}
+	</update>
+	<!-- 查询记录BY ID -->
+	<select id="getById" resultMap="searchResultMap" parameterType="java.lang.String">
+		select
+		<include refid="columns" />
+		from
+		MMS_SYSTEM_SERVICE where id=#{id}
+	</select>
+	<!-- 查询所有记录 -->
+	<select id="getAll" resultMap="searchResultMap" parameterType="java.lang.String">
+		select
+		<include refid="columns" />
+		from
+		MMS_SYSTEM_SERVICE where is_delete=0 order by create_date desc
+	</select>
+	<!-- 查询分页记录 -->
+	<select id="queryPage" resultMap="searchResultMap"
+		parameterType="com.llbt.cms.vo.Page">
+		select 
+		<include refid="columns" /> 
+		from MMS_SYSTEM_SERVICE where is_delete=0 
+		order by create_date desc 
+		limit #{startLine},#{pageSize}
+		<!-- select *
+		from (select rownum rw, t.*
+		from (select
+		<include refid="columns" />
+		from MMS_SYSTEM_SERVICE where is_delete=0 order by create_date desc) t
+		where rownum <![CDATA[<=]]>
+		#{endLine})
+		where rw <![CDATA[>]]>
+		#{startLine} -->
+	</select>
+
+	<select id="getSystemServiceCount" resultType="int">
+		select count(1)
+		from MMS_SYSTEM_SERVICE where is_delete=0
+	</select>
+	<!-- 动态查询条件 -->
+	<sql id="searchConditionSQL">
+		<trim prefix="where" prefixOverrides="AND |OR ">
+			<if test="id != null">
+				and ID = #{id}
+			</if>
+			<if test="createBy != null">
+				and CREATE_BY = #{createBy}
+			</if>
+			<if test="createDate != null">
+				and CREATE_DATE = #{createDate}
+			</if>
+			<if test="updateBy != null">
+				and UPDATE_BY = #{updateBy}
+			</if>
+			<if test="updateDate != null">
+				and UPDATE_DATE = #{updateDate}
+			</if>
+			<if test="serviceCode != null">
+				and SERVICE_CODE = #{serviceCode}
+			</if>
+			<if test="serviceName != null">
+				and SERVICE_NAME = #{serviceName}
+			</if>
+			<if test="serviceDesc != null">
+				and SERVICE_DESC = #{serviceDesc}
+			</if>
+			<if test="dictId != null">
+				and DICT_ID = #{dictId}
+			</if>
+			<if test="listType != null">
+				and LIST_TYPE = #{listType}
+			</if>
+			<if test="serviceState != null">
+				and SERVICE_STATE = #{serviceState}
+			</if>
+			<if test="isDelete != null">
+				and IS_DELETE = #{isDelete}
+			</if>
+		</trim>
+	</sql>
+
+
+
+</mapper>

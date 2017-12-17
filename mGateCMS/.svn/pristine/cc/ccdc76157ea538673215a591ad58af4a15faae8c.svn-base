@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.llbt.cms.dao.OperateLogMapper">
+	<!-- 查询结果映射 -->
+	<resultMap id="searchResultMap" type="com.llbt.cms.entity.OperateLog">
+		<result property="id" column="ID" />
+		<result property="createBy" column="CREATE_BY" />
+		<result property="createDate" column="CREATE_DATE" />
+		<result property="operateMethod" column="OPERATE_METHOD" />
+		<result property="refId" column="REF_ID" />
+		<result property="operateType" column="OPERATE_TYPE" />
+		<result property="operateDesc" column="OPERATE_DESC" />
+		<result property="operator" column="operator" />
+	</resultMap>
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+		ID,CREATE_BY,CREATE_DATE,OPERATE_METHOD,REF_ID,OPERATE_TYPE,OPERATE_DESC
+	</sql>
+	<!-- 新增记录 -->
+	<insert id="insert" parameterType="com.llbt.cms.entity.OperateLog">
+		INSERT INTO MMS_OPERATE_LOG (
+		ID ,
+		CREATE_BY ,
+		CREATE_DATE ,
+		OPERATE_METHOD ,
+		REF_ID ,
+		OPERATE_TYPE ,
+		OPERATE_DESC
+		) VALUES (
+		#{id},
+		#{createBy},
+		#{createDate},
+		#{operateMethod},
+		#{refId},
+		#{operateType},
+		#{operateDesc}
+		)
+	</insert>
+	<!-- 单记录删除 -->
+	<delete id="delete" parameterType="java.lang.String">
+		update MMS_OPERATE_LOG set
+		is_delete=1
+		where id=#{id}
+	</delete>
+	<!-- 批量记录删除 -->
+	<delete id="deleteByIds" parameterType="java.util.List">
+		update MMS_OPERATE_LOG set is_delete=1 where id in
+		<foreach collection="list" item="ids" open="(" separator=","
+			close=")">#{ids}</foreach>
+	</delete>
+	<!-- 单记录更新 -->
+	<update id="update" parameterType="com.llbt.cms.entity.OperateLog">
+		UPDATE MMS_OPERATE_LOG
+		<trim prefix="set" suffixOverrides=",">
+			<if test="id != null">
+				ID =#{id},
+			</if>
+			<if test="operateMethod != null">
+				OPERATE_METHOD =#{operateMethod},
+			</if>
+			<if test="refId != null">
+				REF_ID =#{refId},
+			</if>
+			<if test="operateType != null">
+				OPERATE_TYPE =#{operateType},
+			</if>
+			<if test="operateDesc != null">
+				OPERATE_DESC =#{operateDesc},
+			</if>
+		</trim>
+		where id=#{id}
+	</update>
+	<!-- 查询记录BY ID -->
+	<select id="getById" resultMap="searchResultMap" parameterType="java.lang.String">
+		select
+		<include refid="columns" />
+		from
+		MMS_OPERATE_LOG where id=#{id}
+	</select>
+	<!-- 查询所有记录 -->
+	<select id="getAll" resultMap="searchResultMap" parameterType="java.lang.String">
+		select
+		<include refid="columns" />
+		from
+		MMS_OPERATE_LOG where is_delete=0 order by create_date desc
+	</select>
+	<!-- 查询分页记录 -->
+	<select id="queryPage" resultMap="searchResultMap"
+		parameterType="com.llbt.cms.vo.Page">
+		select *
+		from (select rownum rw, t.*
+		from (select
+		l.*,u.user_name operator
+		from MMS_OPERATE_LOG l left join mms_user u on l.create_by=u.id  order by l.create_date desc) t
+		where rownum <![CDATA[<=]]>
+		#{endLine})
+		where rw <![CDATA[>]]>
+		#{startLine}
+	</select>
+
+	<select id="getOperateLogCount" resultType="int">
+		select count(1) from
+		MMS_OPERATE_LOG 
+	</select>
+	<!-- 动态查询条件 -->
+	<sql id="searchConditionSQL">
+		<trim prefix="where" prefixOverrides="AND |OR ">
+			<if test="id != null">
+				and ID = #{id}
+			</if>
+			<if test="createBy != null">
+				and CREATE_BY = #{createBy}
+			</if>
+			<if test="createDate != null">
+				and CREATE_DATE = #{createDate}
+			</if>
+			<if test="operateMethod != null">
+				and OPERATE_METHOD = #{operateMethod}
+			</if>
+			<if test="refId != null">
+				and REF_ID = #{refId}
+			</if>
+			<if test="operateType != null">
+				and OPERATE_TYPE = #{operateType}
+			</if>
+			<if test="operateDesc != null">
+				and OPERATE_DESC = #{operateDesc}
+			</if>
+		</trim>
+	</sql>
+
+
+
+</mapper>

@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.llbt.cms.dao.QuestionAnswerMapper">
+	<!-- 查询结果映射 -->
+	<resultMap id="searchResultMap" type="com.llbt.cms.entity.QuestionAnswer">
+		<result property="id" column="ID" />
+		<result property="createBy" column="CREATE_BY" />
+		<result property="createDate" column="CREATE_DATE" />
+		<result property="updateBy" column="UPDATE_BY" />
+		<result property="updateDate" column="UPDATE_DATE" />
+		<result property="title" column="TITLE" />
+		<result property="answer" column="ANSWER" />
+		<result property="questionDesc" column="QUESTION_DESC" />
+		<result property="questionType" column="QUESTION_TYPE" />
+		<result property="isDelete" column="IS_DELETE" />
+	</resultMap>
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+		ID,CREATE_BY,CREATE_DATE,UPDATE_BY,UPDATE_DATE,TITLE,ANSWER,QUESTION_DESC,QUESTION_TYPE,IS_DELETE
+	</sql>
+	<!-- 新增记录 -->
+	<insert id="insert" parameterType="com.llbt.cms.entity.QuestionAnswer">
+		INSERT INTO
+		MMS_QUESTION_ANSWER (
+		ID ,
+		CREATE_BY ,
+		CREATE_DATE ,
+		UPDATE_BY ,
+		UPDATE_DATE ,
+		TITLE ,
+		ANSWER ,
+		QUESTION_DESC ,
+		QUESTION_TYPE ,
+		IS_DELETE
+		) VALUES (
+		#{id},
+		#{createBy},
+		#{createDate},
+		#{updateBy},
+		#{updateDate},
+		#{title},
+		#{answer},
+		#{questionDesc},
+		#{questionType},
+		#{isDelete}
+		)
+	</insert>
+	<!-- 单记录删除 -->
+	<delete id="delete" parameterType="java.lang.String">
+		update MMS_QUESTION_ANSWER set
+		is_delete=1
+		where id=#{id}
+	</delete>
+	<!-- 批量记录删除 -->
+	<delete id="deleteByIds" parameterType="java.util.List">
+		update MMS_QUESTION_ANSWER set is_delete=1 where id in
+		<foreach collection="list" item="ids" open="(" separator=","
+			close=")">#{ids}</foreach>
+	</delete>
+	<!-- 单记录更新 -->
+	<update id="update" parameterType="com.llbt.cms.entity.QuestionAnswer">
+		UPDATE MMS_QUESTION_ANSWER
+		<trim prefix="set" suffixOverrides=",">
+			<if test="updateBy != null">
+				UPDATE_BY =#{updateBy},
+			</if>
+			<if test="updateDate != null">
+				UPDATE_DATE =#{updateDate},
+			</if>
+			<if test="title != null">
+				TITLE =#{title},
+			</if>
+			<if test="answer != null">
+				ANSWER =#{answer},
+			</if>
+			<if test="questionDesc != null">
+				QUESTION_DESC =#{questionDesc},
+			</if>
+			<if test="questionType != null">
+				QUESTION_TYPE =#{questionType},
+			</if>
+			<if test="isDelete != null">
+				IS_DELETE =#{isDelete},
+			</if>
+		</trim>
+		where id=#{id}
+	</update>
+	<!-- 查询记录BY ID -->
+	<select id="getById" resultMap="searchResultMap" parameterType="java.lang.String">
+		select
+		<include refid="columns" />
+		from
+		MMS_QUESTION_ANSWER where id=#{id}
+	</select>
+	<!-- 查询所有记录 -->
+	<select id="getAll" resultMap="searchResultMap" parameterType="java.lang.String">
+		select
+		<include refid="columns" />
+		from
+		MMS_QUESTION_ANSWER where is_delete=0 order by create_date desc
+	</select>
+	<!-- 查询分页记录 -->
+	<select id="queryPage" resultMap="searchResultMap"
+		parameterType="com.llbt.cms.vo.Page">
+		select *
+		from (select rownum rw, t.*
+		from (select
+		<include refid="columns" />
+		from MMS_QUESTION_ANSWER where is_delete=0 order by create_date desc)
+		t
+		where rownum <![CDATA[<=]]>
+		#{endLine})
+		where rw <![CDATA[>]]>
+		#{startLine}
+	</select>
+
+	<select id="getQuestionAnswerCount" resultType="int">
+		select count(1)
+		from MMS_QUESTION_ANSWER where is_delete=0
+	</select>
+	<!-- 动态查询条件 -->
+	<sql id="searchConditionSQL">
+		<trim prefix="where" prefixOverrides="AND |OR ">
+			<if test="id != null">
+				and ID = #{id}
+			</if>
+			<if test="createBy != null">
+				and CREATE_BY = #{createBy}
+			</if>
+			<if test="createDate != null">
+				and CREATE_DATE = #{createDate}
+			</if>
+			<if test="updateBy != null">
+				and UPDATE_BY = #{updateBy}
+			</if>
+			<if test="updateDate != null">
+				and UPDATE_DATE = #{updateDate}
+			</if>
+			<if test="title != null">
+				and TITLE = #{title}
+			</if>
+			<if test="answer != null">
+				and ANSWER = #{answer}
+			</if>
+			<if test="questionDesc != null">
+				and QUESTION_DESC = #{questionDesc}
+			</if>
+			<if test="questionType != null">
+				and QUESTION_TYPE = #{questionType}
+			</if>
+			<if test="isDelete != null">
+				and IS_DELETE = #{isDelete}
+			</if>
+		</trim>
+	</sql>
+
+
+
+</mapper>

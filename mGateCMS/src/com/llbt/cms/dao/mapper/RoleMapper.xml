@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.llbt.cms.dao.RoleMapper">
+	<!-- 查询结果映射 -->
+	<resultMap id="searchResultMap" type="com.llbt.cms.entity.Role">
+		<result property="id" column="id" jdbcType="VARCHAR" />
+		<result property="createBy" column="create_by" jdbcType="VARCHAR" />
+		<result property="createDate" column="create_date" jdbcType="TIMESTAMP" />
+		<result property="updateBy" column="update_by" jdbcType="VARCHAR" />
+		<result property="updateDate" column="update_date" jdbcType="TIMESTAMP" />
+		<result property="parentId" column="parent_id" jdbcType="VARCHAR" />
+		<result property="roleName" column="role_name" jdbcType="VARCHAR" />
+		<result property="roleDesc" column="role_desc" jdbcType="VARCHAR" />
+		<result property="parentName" column="parent_name" jdbcType="VARCHAR" />
+		<result property="isDelete" column="is_delete" jdbcType="INTEGER" />
+	</resultMap>
+
+	<resultMap id="roleMenuResultMap" type="com.llbt.cms.entity.RoleMenu">
+		<result property="userId" column="user_id" />
+		<result property="roleId" column="role_id" />
+		<result property="menuId" column="menu_id" />
+	</resultMap>
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+		id,create_by,create_date,update_by,update_date,parent_id,role_name,role_desc,is_delete
+	</sql>
+	<!-- 新增记录 -->
+	<insert id="insert" parameterType="com.llbt.cms.entity.Role">
+		INSERT INTO mms_role (
+		id ,
+		create_by ,
+		create_date ,
+		update_by ,
+		update_date ,
+		parent_id ,
+		role_name ,
+		role_desc ,
+		is_delete
+		) VALUES (
+		#{id} ,
+		#{createBy} ,
+		#{createDate} ,
+		#{updateBy} ,
+		#{updateDate} ,
+		#{parentId} ,
+		#{roleName} ,
+		#{roleDesc} ,
+		#{isDelete}
+		)
+	</insert>
+	<!-- 单记录删除 -->
+	<delete id="delete" parameterType="java.lang.String">
+		update mms_role set
+		is_delete=1 where
+		id=#{id}
+	</delete>
+	<!-- 批量记录删除 -->
+	<delete id="deleteByIds" parameterType="java.util.List">
+		update mms_role set is_delete=1 where id in
+		<foreach collection="list" item="ids" open="(" separator=","
+			close=")">#{ids}</foreach>
+	</delete>
+	<!-- 单记录更新 -->
+	<update id="update" parameterType="com.llbt.cms.entity.Role">
+		UPDATE mms_role
+		<trim prefix="set" suffixOverrides=",">
+			<if test="updateBy != null">
+				update_by =#{updateBy},
+			</if>
+			<if test="updateDate != null">
+				update_date =#{updateDate},
+			</if>
+			<if test="parentId != null">
+				parent_id =#{parentId},
+			</if>
+			<if test="roleName != null">
+				role_name =#{roleName},
+			</if>
+			<if test="roleDesc != null">
+				role_desc =#{roleDesc},
+			</if>
+			<if test="isDelete != null">
+				is_delete =#{isDelete},
+			</if>
+		</trim>
+		where id=#{id}
+	</update>
+	<!-- 查询记录BY ID -->
+	<select id="getById" resultMap="searchResultMap" parameterType="java.lang.String">
+		select
+		<include refid="columns" />
+		<!-- ,nvl(t.parent_name,'Top role') parent_name -->
+		from
+		mms_role<!-- ,(select id as
+		tid,role_name as parent_name
+		from
+		mms_role where id=(select parent_id
+		from
+		mms_role where id=#{id}))
+		t
+		where t.tid(+)=parent_id and --> where id=#{id}
+	</select>
+	<!-- 查询所有记录 -->
+	<select id="getAll" resultMap="searchResultMap">
+		select
+		<include refid="columns" />
+		from
+		mms_role where is_delete=0
+	</select>
+	<!-- 查询分页记录 -->
+	<select id="queryPage" resultMap="searchResultMap"
+		parameterType="com.llbt.cms.vo.Page">
+		select 
+		<include refid="columns" /> 
+		from mms_role where is_delete=0 
+		order by create_date desc 
+		limit #{startLine},#{pageSize}
+		<!-- select *
+		from (select rownum rw, t.*
+		from (select
+		<include refid="columns" />
+		from mms_role where is_delete=0 order by create_date desc) t
+		where
+		rownum <![CDATA[<=]]>
+		#{endLine})
+		where rw <![CDATA[>]]>
+		#{startLine} -->
+	</select>
+	<!-- 查询总条数 -->
+	<select id="getRoleCount" resultType="int" parameterType="Integer">
+		select
+		count(*) from mms_role where is_delete=0
+	</select>
+
+	<select id="getRoleMap" resultMap="searchResultMap">
+		select
+		<include refid="columns" />
+		from mms_role
+	</select>
+
+	<select id="getRoleMenus" resultMap="roleMenuResultMap">
+	select min(role_id) role_id,menu_id  from mms_role_menu group by menu_id order by menu_id desc
+		<!-- select role_id,menu_id from
+		mms_role_menu -->
+		<!-- select *, count(distinct menu_id) count from mms_role_menu group by menu_id -->
+	</select>
+
+	<select id="getUserRoles" resultMap="roleMenuResultMap">
+		select user_id,role_id from
+		mms_user_role
+	</select>
+
+	<select id="countRoleName" resultType="int">
+		select COUNT(1) from
+		mms_role where is_delete = 0 and ROLE_NAME=#{value}
+	</select>
+
+	<delete id="deleteUserRoles">
+		delete from mms_user_role where role_id in
+		<foreach collection="list" item="ids" open="(" separator=","
+			close=")">#{ids}</foreach>
+	</delete>
+
+</mapper>
