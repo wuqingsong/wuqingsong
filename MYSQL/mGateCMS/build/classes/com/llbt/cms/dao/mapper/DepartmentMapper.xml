@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.llbt.cms.dao.DepartmentMapper">
+	<!-- 查询结果映射 -->
+	<resultMap id="searchResultMap" type="com.llbt.cms.entity.Department">
+		<result property="id" column="id" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="parentId" column="parent_id" />
+		<result property="parentName" column="parent_name" />
+		<result property="deptLevel" column="dept_level" />
+		<result property="deptName" column="dept_name" />
+		<result property="deptCode" column="dept_code" />
+		<result property="deptDesc" column="dept_desc" />
+		<result property="isDelete" column="is_delete" />
+		<result property="deptState" column="dept_state" />
+	</resultMap>
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+		id,create_by,create_date,update_by,update_date,parent_id,dept_level,dept_name,dept_code,dept_desc,is_delete,dept_state
+	</sql>
+	<!-- 新增记录 -->
+	<insert id="insert" parameterType="com.llbt.cms.entity.Department">
+		INSERT INTO mms_department (
+		id ,
+		create_by ,
+		create_date ,
+		update_by ,
+		update_date ,
+		parent_id ,
+		dept_level ,
+		dept_name ,
+		dept_code ,
+		dept_desc ,
+		is_delete ,
+		dept_state
+		)
+		VALUES (
+		#{id},
+		#{createBy},
+		#{createDate},
+		#{updateBy},
+		#{updateDate},
+		#{parentId},
+		#{deptLevel},
+		#{deptName},
+		#{deptCode},
+		#{deptDesc},
+		#{isDelete},
+		#{deptState}
+		)
+	</insert>
+	<!-- 单记录删除 -->
+	<delete id="delete" parameterType="java.lang.String">
+		update mms_department set
+		is_delete=1
+		where id=#{id}
+	</delete>
+	<!-- 批量记录删除 -->
+	<delete id="deleteByIds" parameterType="java.util.List">
+		update mms_department set is_delete=1 where id in
+		<foreach collection="list" item="ids" open="(" separator=","
+			close=")">#{ids}</foreach>
+	</delete>
+	<!-- 单记录更新 -->
+	<update id="update" parameterType="com.llbt.cms.entity.Department">
+		UPDATE mms_department
+		<trim prefix="set" suffixOverrides=",">
+			<if test="updateBy != null">
+				update_by =#{updateBy},
+			</if>
+			<if test="updateDate != null">
+				update_date =#{updateDate},
+			</if>
+			<if test="parentId != null">
+				parent_id =#{parentId},
+			</if>
+			<if test="deptLevel != null">
+				dept_level =#{deptLevel},
+			</if>
+			<if test="deptName != null">
+				dept_name =#{deptName},
+			</if>
+			<if test="deptCode != null">
+				dept_code =#{deptCode},
+			</if>
+			<if test="deptDesc != null">
+				dept_desc =#{deptDesc},
+			</if>
+			<if test="isDelete != null">
+				is_delete =#{isDelete},
+			</if>
+			<if test="deptState != null">
+				dept_state =#{deptState},
+			</if>
+		</trim>
+		where id=#{id}
+	</update>
+	<!-- 查询记录BY ID -->
+	<select id="getById" resultMap="searchResultMap" parameterType="java.lang.String">
+		select
+		<include refid="columns" />
+		,IFNULL((select dept_name from mms_department where id=(select parent_id
+		from
+		mms_department where id=#{id})),'Top department') parent_name
+		from
+		mms_department where
+		id=#{id}
+	</select>
+	<!-- 查询所有记录 -->
+	<select id="getAll" resultMap="searchResultMap" parameterType="java.lang.String">
+		select
+		<include refid="columns" />
+		from
+		mms_department where is_delete=0 order by create_date desc
+	</select>
+	<!-- 查询分页记录 -->
+	<select id="queryPage" resultMap="searchResultMap"
+		parameterType="com.llbt.cms.vo.Page">
+		select
+		<include refid="columns" />
+		from mms_department where is_delete=0 order by create_date desc
+		limit
+		#{startLine},#{pageSize}
+		<!-- select * from (select rownum rw, t.* from (select <include refid="columns" 
+			/> from mms_department where is_delete=0 order by create_date desc) t where 
+			rownum <![CDATA[<=]]> #{endLine}) where rw <![CDATA[>]]> #{startLine} -->
+	</select>
+
+	<select id="getDepartmentCount" resultType="int">
+		select count(1) from
+		mms_department where is_delete=0
+	</select>
+	<!-- 动态查询条件 -->
+	<sql id="searchConditionSQL">
+		<trim prefix="where" prefixOverrides="AND |OR ">
+			<if test="id != null">
+				and id = #{id}
+			</if>
+			<if test="createBy != null">
+				and create_by = #{createBy}
+			</if>
+			<if test="createDate != null">
+				and create_date = #{createDate}
+			</if>
+			<if test="updateBy != null">
+				and update_by = #{updateBy}
+			</if>
+			<if test="updateDate != null">
+				and update_date = #{updateDate}
+			</if>
+			<if test="parentId != null">
+				and parent_id = #{parentId}
+			</if>
+			<if test="deptLevel != null">
+				and dept_level = #{deptLevel}
+			</if>
+			<if test="deptName != null">
+				and dept_name = #{deptName}
+			</if>
+			<if test="deptCode != null">
+				and dept_code = #{deptCode}
+			</if>
+			<if test="deptDesc != null">
+				and dept_desc = #{deptDesc}
+			</if>
+			<if test="isDelete != null">
+				and is_delete = #{isDelete}
+			</if>
+			<if test="deptState != null">
+				and dept_state = #{deptState}
+			</if>
+		</trim>
+	</sql>
+	<select id="countDeptName" resultType="int">
+		select COUNT(1) from
+		mms_department where is_delete = 0 and Dept_NAME=#{value}
+	</select>
+
+
+</mapper>

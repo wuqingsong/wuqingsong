@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.llbt.cms.dao.ServiceAgreementMapper">
+	<!-- 查询结果映射 -->
+	<resultMap id="searchResultMap" type="com.llbt.cms.entity.ServiceAgreement">
+		<result property="id" column="id" />
+		<result property="createBy" column="create_by" />
+		<result property="createDate" column="create_date" />
+		<result property="updateBy" column="update_by" />
+		<result property="updateDate" column="update_date" />
+		<result property="agreementName" column="agreement_name" />
+		<result property="contentUrl" column="content_url" />
+		<result property="agreementDesc" column="agreement_desc" />
+		<result property="refType" column="ref_type" />
+	</resultMap>
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="columns">
+		id,create_by,create_date,update_by,update_date,agreement_name,content_url,agreement_desc,ref_type
+	</sql>
+	<!-- 新增记录 -->
+	<insert id="insert" parameterType="com.llbt.cms.entity.ServiceAgreement">
+		INSERT INTO mms_service_agreement (
+		id ,
+		create_by ,
+		create_date ,
+		update_by ,
+		update_date ,
+		agreement_name ,
+		content_url ,
+		agreement_desc ,
+		ref_type 
+		) VALUES (
+#{id},
+#{createBy},
+#{createDate},
+#{updateBy},
+#{updateDate},
+#{agreementName},
+#{contentUrl},
+#{agreementDesc},
+#{refType}
+		)
+	</insert>
+	<!-- 单记录删除 -->
+	<delete id="delete" parameterType="java.lang.String">
+		update mms_service_agreement set
+		is_delete=1
+		where id=#{id}
+	</delete>
+	<!-- 批量记录删除 -->
+	<delete id="deleteByIds" parameterType="java.util.List">
+		update mms_service_agreement set is_delete=1 where id in
+		<foreach collection="list" item="ids" open="(" separator=","
+			close=")">#{ids}</foreach>
+	</delete>
+	<!-- 单记录更新 -->
+	<update id="update" parameterType="com.llbt.cms.entity.ServiceAgreement">
+		UPDATE mms_service_agreement
+		<trim prefix="set" suffixOverrides=",">
+			<if test="updateBy != null">
+				update_by =#{updateBy},
+			</if>
+			<if test="updateDate != null">
+				update_date =#{updateDate},
+			</if>
+			<if test="agreementName != null">
+				agreement_name =#{agreementName},
+			</if>
+			<if test="contentUrl != null">
+				content_url =#{contentUrl},
+			</if>
+			<if test="agreementDesc != null">
+				agreement_desc =#{agreementDesc},
+			</if>
+			<if test="refType != null">
+				ref_type =#{refType},
+			</if>
+		</trim>
+		where id=#{id}
+	</update>
+	<!-- 查询记录BY ID -->
+	<select id="getById" resultMap="searchResultMap" parameterType="java.lang.String">
+		select
+		<include refid="columns" />
+		from
+		mms_service_agreement where id=#{id}
+	</select>
+	<!-- 查询所有记录 -->
+	<select id="getAll" resultMap="searchResultMap" parameterType="java.lang.String">
+		select
+		<include refid="columns" />
+		from
+		mms_service_agreement  order by create_date desc
+	</select>
+	<!-- 查询分页记录 -->
+	<select id="queryPage" resultMap="searchResultMap"
+		parameterType="com.llbt.cms.vo.Page">
+		select
+		<include refid="columns" />
+		from mms_service_agreement
+		 order by create_date desc
+		limit
+		#{startLine},#{pageSize}
+		<!-- select *
+		from (select rownum rw, t.*
+		from (select
+		<include refid="columns" />
+		from mms_service_agreement  order by create_date desc) t
+		where rownum <![CDATA[<=]]>
+#{endLine})
+		where rw <![CDATA[>]]>
+#{startLine} -->
+	</select>
+	
+	<select id="getServiceAgreementCount" resultType="int">
+		select count(1) from mms_service_agreement
+	</select>
+	<!-- 动态查询条件 -->
+	<sql id="searchConditionSQL">
+		<trim prefix="where" prefixOverrides="AND |OR ">
+			<if test="id != null">
+				and id = #{id}			</if>
+			<if test="createBy != null">
+				and create_by = #{createBy}			</if>
+			<if test="createDate != null">
+				and create_date = #{createDate}			</if>
+			<if test="updateBy != null">
+				and update_by = #{updateBy}			</if>
+			<if test="updateDate != null">
+				and update_date = #{updateDate}			</if>
+			<if test="agreementName != null">
+				and agreement_name = #{agreementName}			</if>
+			<if test="contentUrl != null">
+				and content_url = #{contentUrl}			</if>
+			<if test="agreementDesc != null">
+				and agreement_desc = #{agreementDesc}			</if>
+			<if test="refType != null">
+				and ref_type = #{refType}			</if>
+		</trim>
+	</sql>
+
+
+
+</mapper>
